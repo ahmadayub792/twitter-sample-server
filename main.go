@@ -1,14 +1,14 @@
 package main
 
 import (
-	// "fmt"
-
 	"fmt"
 
 	"github.com/ahmadayub792/twitter-sample-server/app"
+	"github.com/ahmadayub792/twitter-sample-server/handler"
 	"github.com/ahmadayub792/twitter-sample-server/model"
 	"github.com/ahmadayub792/twitter-sample-server/store"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -69,11 +69,11 @@ func main() {
 
 	// Application
 	app := &app.App{
-		UserStore:   userStore,
-		ClientStore: clientStore,
-		TargetStore: targetStore,
+		UserStore:      userStore,
+		ClientStore:    clientStore,
+		TargetStore:    targetStore,
 		PasswordHasher: bcryptHasher,
-		TokenSecret: []byte("Hello World"),
+		TokenSecret:    []byte("Hello World"),
 	}
 
 	token, err := app.GenerateToken("admin1", "HelloWorld")
@@ -87,4 +87,9 @@ func main() {
 		panic(err)
 	}
 	spew.Dump(app.User)
+
+	handle := handler.NewHandler(app)
+	r := gin.Default()
+	r.POST("/users/authenticate", handle.Login)
+	r.Run()
 }
