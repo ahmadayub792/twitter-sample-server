@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ahmadayub792/twitter-sample-server/app"
+	"github.com/ahmadayub792/twitter-sample-server/config"
 	"github.com/ahmadayub792/twitter-sample-server/handler"
 	"github.com/ahmadayub792/twitter-sample-server/model"
 	"github.com/ahmadayub792/twitter-sample-server/store"
@@ -12,14 +13,18 @@ import (
 )
 
 func main() {
-	db, err := model.Setup("localhost", "5432", "postgres", "postgres")
+	err := config.ConnectDB()
 	if err != nil {
 		panic(err)
 	}
 
-	userStore := store.NewUserStore(db)
-	clientStore := store.NewClientStore(db)
-	targetStore := store.NewTargetStore(db)
+	if err := model.Setup(); err != nil {
+		panic(err)
+	}
+
+	userStore := store.NewUserStore(config.DB)
+	clientStore := store.NewClientStore(config.DB)
+	targetStore := store.NewTargetStore(config.DB)
 	bcryptHasher := app.NewBcryptHasher(10)
 
 	// Seed Data
@@ -59,13 +64,6 @@ func main() {
 			panic(err)
 		}
 	}
-
-	var Rtargets []*model.Target
-	Rtargets, err = targetStore.FindAll()
-	if err != nil {
-		panic(err)
-	}
-	spew.Dump(Rtargets)
 
 	// Application
 	app := &app.App{

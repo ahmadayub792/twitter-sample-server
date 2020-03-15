@@ -4,22 +4,18 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ahmadayub792/twitter-sample-server/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-func Setup(host, port, user, dbname string) (*gorm.DB, error) {
-	conString := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=docker sslmode=disable", host, port, user, dbname)
-	db, err := gorm.Open("postgres", conString)
-	if err != nil {
-		return nil, err
+func Setup() error {
+
+	if err := config.DB.Transaction(migrate); err != nil {
+		return err
 	}
 
-	if err := db.Transaction(migrate); err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return nil
 }
 
 func migrate(tx *gorm.DB) error {
