@@ -21,6 +21,7 @@ func Authenticate() gin.HandlerFunc {
 		tokenStr := c.Request.Header.Get("token")
 		if err := myapp.VerifyToken(tokenStr); err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("%v", err)})
+			return
 		}
 		c.Next()
 	}
