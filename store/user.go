@@ -9,7 +9,6 @@ type UserStore struct {
 	db *gorm.DB
 }
 
-var _ UserStorer = &UserStore{} //puchna hay
 
 func NewUserStore(db *gorm.DB) UserStorer {
 	return &UserStore{db}

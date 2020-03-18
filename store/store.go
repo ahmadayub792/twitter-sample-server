@@ -13,6 +13,7 @@ var (
 type UserStorer interface {
 	Create(*model.User) error
 	FindOne(where ...interface{}) (*model.User, error)
+	FindAll() ([]*model.User, error)
 }
 
 type ClientStorer interface {

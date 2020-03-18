@@ -9,12 +9,12 @@ type App struct {
 	UserStore   store.UserStorer
 	ClientStore store.ClientStorer
 	TargetStore store.TargetStorer
-	
+
 	PasswordHasher Hasher
 
 	User *model.User
 
-	TokenSecret []byte // TODO: I don't know, implement jwt token shayad
+	TokenSecret []byte
 }
 
 func (a *App) setUserSession(user *model.User) {

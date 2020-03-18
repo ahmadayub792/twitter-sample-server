@@ -5,34 +5,40 @@ import (
 	"net/http"
 
 	"github.com/ahmadayub792/twitter-sample-server/app"
+	"github.com/ahmadayub792/twitter-sample-server/model"
 	"github.com/gin-gonic/gin"
 )
 
-type Controller interface {
-	Login(*gin.Context)
-}
-
-type Handler struct {
-	App *app.App
-}
-
 type loginCreds struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
-func NewHandler(app *app.App) Controller {
-	return &Handler{app}
-}
+func Login(c *gin.Context) {
+	myapp := c.MustGet("app").(*app.App)
 
-func (h *Handler) Login(c *gin.Context) {
 	var creds loginCreds
 	c.BindJSON(&creds)
-	tokenStr, err := h.App.GenerateToken(creds.Email, creds.Password)
+	tokenStr, err := myapp.GenerateToken(creds.Email, creds.Password)
 	if err != nil {
 		fmt.Println(err)
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": fmt.Sprintf("%v", err)})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": tokenStr})
+}
+
+func ListUsers(c *gin.Context) {
+	myapp := c.MustGet("app").(*app.App)
+	if myapp.User.Role != model.RoleAdmin {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Permission denied"})
+		return
+	}
+
+	users, err := myapp.UserStore.FindAll()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": fmt.Sprintf("%v", err)})
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }
